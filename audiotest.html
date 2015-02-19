@@ -1,0 +1,97 @@
+<html>
+<head></head>
+<body>
+<script type="application/javascript">
+    //from http://www.html5rocks.com/en/tutorials/webaudio/intro/
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    var playing = false;
+    var notelen = 1000;
+    var oscillators=[];
+    var timer;
+    var gain=audioCtx.createGain();
+    gain.gain.value=0;
+    var time=0;
+    var wave='sine';
+    function playSound() {
+        if(playing===true){
+            playing = false;
+            for(var j=0; j<oscillators.length; j++)
+            {
+                oscillators[j].stop();
+                oscillators[j].disconnect();
+            }
+            time=0;
+            clearInterval(timer);
+            notelen=1000;
+        }
+        else {
+            playing = true;
+            gain.gain.value=document.getElementById("vol").value;
+            wave=document.getElementById("waveType").value
+            var notes=document.getElementById("notes").value;
+            notelen=document.getElementById("len").value;
+            console.log(notes);
+            var scale = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
+            console.log(scale);
+            for(var i=0; i<notes.length; i++)
+            {
+                oscillators[i]=audioCtx.createOscillator();
+                var z;
+                switch(notes[i]){
+                        case "C":
+                        z=scale[0];
+                        break;
+                        case "D":
+                        z=scale[1];
+                        break;
+                        case "E":
+                        z=scale[2];
+                        break;
+                        case "F":
+                        z=scale[3];
+                        break;
+                        case "G":
+                        z=scale[4];
+                        break;
+                        case "A":
+                        z=scale[5];
+                        break;
+                        case "B":
+                        z=scale[6];
+                        break;
+                        default:
+                        z=440;
+                        break;
+                }
+                console.log(z);
+                oscillators[i].type=wave;
+                oscillators[i].frequency.value=z;
+                oscillators[i].connect(gain)
+                gain.connect(audioCtx.destination);
+            }
+            timer=window.setInterval(playNotes, notelen)
+        }
+        console.log("called");    }
+    function playNotes(){
+        if(time<oscillators.length){
+            if(time!=0){
+                oscillators[time-1].stop(0);
+            }
+            oscillators[time].start(0);
+        }
+        if(time===oscillators.length) oscillators[time-1].stop(0);
+        time++;
+    }
+    </script>
+    <button onclick="playSound()">play/stop</button><br>
+    Notes:<input type="text" id="notes"><br>
+    Note Length(ms, default 1s):<input type="number" id="len"><br>
+    Wave Type:<select id="waveType">
+                <option>sine</option>
+                <option>square</option>
+                <option>sawtooth</option>
+                <option>triangle</option>
+    </select><br>
+    Volume(0-1):<input type="number" id="vol"><br>
+</body>
+</html>
